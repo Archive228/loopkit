@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": ["Bash(ls:*)","Bash(git status:*)","Bash(git diff:*)","Bash(cat:*)","Bash(grep:*)","Read(*)"],
+    "deny": ["Bash(rm -rf:*)","Bash(git push --force:*)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {"matcher": "Edit|Write", "hooks": [{"type": "command", "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"}]}
+    ]
+  }
+}
