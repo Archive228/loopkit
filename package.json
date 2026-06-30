@@ -1,0 +1,34 @@
+{
+  "name": "claude-loopkit",
+  "version": "0.1.0",
+  "description": "Drop-in .claude/ harness + 33 battle-tested skills for any coding agent (Claude Code, Cursor, Codex, Gemini CLI).",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "agent",
+    "skills",
+    "harness",
+    "cursor",
+    "codex",
+    "gemini-cli",
+    "ai",
+    "llm"
+  ],
+  "homepage": "https://github.com/Archive228/loopkit#readme",
+  "bugs": {
+    "url": "https://github.com/Archive228/loopkit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Archive228/loopkit.git"
+  },
+  "license": "MIT",
+  "author": "Archive228",
+  "bin": {
+    "claude-loopkit": "bin/loopkit.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

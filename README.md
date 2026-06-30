@@ -5,10 +5,24 @@
 Drop them into `.claude/skills/` (or any agent that reads SKILL.md) and your agent loads each one only when it's relevant: debug systematically, review for security, design real UIs, run agents in a lean loop, write the failing test first, ship clean commits.
 
 ```bash
-npx loopkit init
+npx claude-loopkit init
 ```
 
+That's the whole install. Existing files are kept by default — pass `--force` to overwrite, `--dry-run` to preview.
+
 Compatible with **Claude Code · Cursor · Codex · Gemini CLI**. Built on the agent-engineering patterns Anthropic publishes ([Building Effective Agents](https://www.anthropic.com/research/building-effective-agents), Claude Code docs) — distilled into skills you can actually drop in.
+
+## What `init` writes
+
+Into your current directory:
+
+- `.claude/CLAUDE.md` — 60-line standing context
+- `.claude/settings.json` — permission allowlist + format-on-write hook
+- `.claude/agents/verifier.md` — adversarial verifier subagent
+- `.claude/skills/` — the 33 skill files (load only on trigger)
+- `.mcp.json` — MCP server wiring
+- `MEMORY.md` — cross-session memory index
+- `run.sh` — Plan→Act→Verify loop runner
 
 ## Why skills
 
