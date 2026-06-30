@@ -5,14 +5,12 @@
 Drop them into `.claude/skills/` (or any agent that reads SKILL.md) and your agent loads each one only when it's relevant: debug systematically, review for security, design real UIs, run agents in a lean loop, write the failing test first, ship clean commits.
 
 ```bash
-npx claude-loopkit init
+curl -fsSL https://raw.githubusercontent.com/Archive228/loopkit/main/install.sh | bash
 ```
-
-That's the whole install. Existing files are kept by default — pass `--force` to overwrite, `--dry-run` to preview.
 
 Compatible with **Claude Code · Cursor · Codex · Gemini CLI**. Built on the agent-engineering patterns Anthropic publishes ([Building Effective Agents](https://www.anthropic.com/research/building-effective-agents), Claude Code docs) — distilled into skills you can actually drop in.
 
-## What `init` writes
+## What the installer writes
 
 Into your current directory:
 
@@ -23,6 +21,19 @@ Into your current directory:
 - `.mcp.json` — MCP server wiring
 - `MEMORY.md` — cross-session memory index
 - `run.sh` — Plan→Act→Verify loop runner
+
+Existing files are kept by default. Pass `FORCE=1` to overwrite:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Archive228/loopkit/main/install.sh | FORCE=1 bash
+```
+
+Or clone and copy manually:
+
+```bash
+git clone https://github.com/Archive228/loopkit
+cp -r loopkit/.claude loopkit/skills loopkit/.mcp.json loopkit/MEMORY.md loopkit/run.sh your-project/
+```
 
 ## Why skills
 
