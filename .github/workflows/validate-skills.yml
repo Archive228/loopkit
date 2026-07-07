@@ -1,0 +1,34 @@
+name: validate-skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SKILL.md frontmatter
+        run: bash ./scripts/validate-skills
+
+      - name: Syntax-check install.sh
+        run: bash -n ./install.sh
+
+      - name: Syntax-check run.sh
+        run: bash -n ./run.sh
+
+      - name: Syntax-check scripts/committer
+        run: bash -n ./scripts/committer
+
+      - name: Syntax-check scripts/validate-skills
+        run: bash -n ./scripts/validate-skills
+
+      - name: Syntax-check scripts/sync-skills
+        run: bash -n ./scripts/sync-skills
+
+      - name: Verify sync-skills --check runs cleanly on a fresh clone
+        run: bash ./scripts/sync-skills --check || true

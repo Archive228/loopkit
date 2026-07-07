@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# sync-skills: keep installed loopkit skills as symlinks to this repo's source
+# of truth, so `git pull` here == "update every consumer of this loadout".
+# Pattern adapted from steipete/agent-scripts.
+#
+# Modes:
+#   --to-user           symlink ./skills/* into ~/.claude/skills/
+#   --to-project <dir>  symlink ./skills/* into <dir>/.claude/skills/
+#   --check             list drift between ./skills/ and known install targets
+#   --dry-run           print actions without touching disk (combine with any mode)
+#   -h | --help         this help
+#
+# Refuses to clobber a non-symlink target (a real file or a non-empty dir).
+# Bash 3.2 compatible (macOS default). Zero dependencies.
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+src_root="$repo_root/skills"
+
+usage() {
+  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+  exit "${1:-0}"
+}
+
+if [ ! -d "$src_root" ]; then
+  echo "sync-skills: no skills/ directory in $repo_root" >&2
+  exit 2
+fi
+
+mode=""
+project_dir=""
+dry_run=0
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --to-user)    mode="user"; shift ;;
+    --to-project) mode="project"; project_dir="${2:-}"; shift 2 ;;
+    --check)      mode="check"; shift ;;
+    --dry-run)    dry_run=1; shift ;;
+    -h|--help)    usage 0 ;;
+    *) echo "sync-skills: unknown arg: $1" >&2; usage 2 ;;
+  esac
+done
+
+[ -n "$mode" ] || usage 2
+if [ "$mode" = "project" ] && [ -z "$project_dir" ]; then
+  echo "sync-skills: --to-project requires a path" >&2
+  exit 2
+fi
+
+do_link() {
+  # $1 = absolute source dir, $2 = absolute destination path
+  local src="$1" dst="$2"
+  if [ -L "$dst" ]; then
+    local current
+    current="$(readlink "$dst")"
+    if [ "$current" = "$src" ]; then
+      printf 'ok       %s\n' "$dst"
+      return 0
+    fi
+    printf 're-link  %s -> %s (was: %s)\n' "$dst" "$src" "$current"
+    if [ "$dry_run" -eq 0 ]; then
+      rm "$dst"
+      ln -s "$src" "$dst"
+    fi
+    return 0
+  fi
+  if [ -e "$dst" ]; then
+    printf 'skip     %s (exists and is not a symlink — refusing to clobber)\n' "$dst" >&2
+    return 1
+  fi
+  printf 'link     %s -> %s\n' "$dst" "$src"
+  [ "$dry_run" -eq 0 ] && ln -s "$src" "$dst"
+  return 0
+}
+
+sync_into() {
+  local dst_root="$1"
+  [ "$dry_run" -eq 0 ] && mkdir -p "$dst_root"
+  local errors=0 count=0
+  for entry in "$src_root"/*; do
+    [ -d "$entry" ] || continue
+    [ -f "$entry/SKILL.md" ] || continue
+    name="$(basename "$entry")"
+    do_link "$entry" "$dst_root/$name" || errors=$((errors + 1))
+    count=$((count + 1))
+  done
+  echo "sync-skills: $count skill(s) processed, $errors error(s) into $dst_root"
+  [ "$errors" -eq 0 ]
+}
+
+check_drift() {
+  # Known install targets: user-scope + any project's .claude/skills under $HOME.
+  local candidates=()
+  [ -d "${HOME}/.claude/skills" ] && candidates+=("${HOME}/.claude/skills")
+  if [ -d "${HOME}" ]; then
+    while IFS= read -r -d '' d; do
+      candidates+=("$d")
+    done < <(find "${HOME}" -maxdepth 5 -type d -name skills -path "*/.claude/*" -not -path "*/node_modules/*" -print0 2>/dev/null)
+  fi
+  if [ "${#candidates[@]}" -eq 0 ]; then
+    echo "sync-skills: no install targets found under \$HOME"
+    return 0
+  fi
+  local drift=0
+  # De-dupe candidates the bash-3.2 way.
+  local seen=""
+  for root in "${candidates[@]}"; do
+    case ":$seen:" in *":$root:"*) continue ;; esac
+    seen="$seen:$root"
+    echo "== $root =="
+    for entry in "$src_root"/*; do
+      [ -d "$entry" ] || continue
+      name="$(basename "$entry")"
+      target="$root/$name"
+      if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+        printf '  missing  %s\n' "$name"; drift=$((drift + 1)); continue
+      fi
+      if [ ! -L "$target" ]; then
+        printf '  copy     %s (not a symlink — will not auto-update on git pull)\n' "$name"
+        drift=$((drift + 1)); continue
+      fi
+      current="$(readlink "$target")"
+      if [ "$current" != "$entry" ]; then
+        printf '  stale    %s (points at %s)\n' "$name" "$current"
+        drift=$((drift + 1)); continue
+      fi
+    done
+  done
+  if [ "$drift" -eq 0 ]; then
+    echo "sync-skills: no drift"
+  else
+    echo "sync-skills: $drift drift item(s) — run --to-user or --to-project <dir> to fix"
+    return 1
+  fi
+}
+
+case "$mode" in
+  user)    sync_into "${HOME}/.claude/skills" ;;
+  project) sync_into "${project_dir%/}/.claude/skills" ;;
+  check)   check_drift ;;
+esac

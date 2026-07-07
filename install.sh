@@ -109,7 +109,7 @@ copy_tree() {
 step "installing files"
 copy_tree "$TMP/.claude" "$DEST/.claude"
 copy_tree "$TMP/skills"  "$DEST/.claude/skills"
-for f in .mcp.json MEMORY.md run.sh; do
+for f in .mcp.json MEMORY.md run.sh AGENTS.md; do
   [ -f "$TMP/$f" ] && copy_file "$TMP/$f" "$DEST/$f"
 done
 say ""
