@@ -1,7 +1,7 @@
 {
   "name": "claude-loopkit",
   "version": "0.1.0",
-  "description": "Drop-in .claude/ harness + 33 battle-tested skills for any coding agent (Claude Code, Cursor, Codex, Gemini CLI).",
+  "description": "Drop-in .claude/ harness + 41 battle-tested skills for any coding agent (Claude Code, Cursor, Codex, Gemini CLI).",
   "keywords": [
     "claude",
     "claude-code",

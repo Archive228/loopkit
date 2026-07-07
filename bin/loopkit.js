@@ -12,7 +12,7 @@ const HELP = args.includes('-h') || args.includes('--help');
 const VERSION = args.includes('--version');
 
 function help() {
-  console.log(`claude-loopkit — drop-in .claude/ harness + 33 skills
+  console.log(`claude-loopkit — drop-in .claude/ harness + 41 skills
 
 Usage:
   npx claude-loopkit init [--force] [--dry-run]
@@ -22,7 +22,7 @@ init copies into the current directory:
   .claude/CLAUDE.md
   .claude/settings.json
   .claude/agents/verifier.md
-  .claude/skills/<33 skill dirs>
+  .claude/skills/<41 skill dirs>
   .mcp.json
   MEMORY.md
   run.sh
@@ -114,4 +114,4 @@ console.log(`  ${wrote} files written, ${skipped} skipped${skipped ? ' (use --fo
 console.log(`  installed into ${CWD}`);
 console.log();
 console.log(`Next: open Claude Code in this directory. Skills load on relevant triggers.`);
-console.log(`Docs and full 33-skill list: https://github.com/Archive228/loopkit`);
+console.log(`Docs and full 41-skill list: https://github.com/Archive228/loopkit`);

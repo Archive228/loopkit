@@ -1,6 +1,6 @@
 ---
 name: using-loopkit
-description: Use when starting any conversation in a loopkit-enabled project - establishes how to find and use loopkit's 33 skills, requiring skill invocation before ANY response including clarifying questions.
+description: Use when starting any conversation in a loopkit-enabled project - establishes how to find and use loopkit's 41 skills, requiring skill invocation before ANY response including clarifying questions.
 ---
 
 # Using Loopkit
@@ -23,7 +23,7 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 Skills are files at `.claude/skills/<name>/SKILL.md`. Each has YAML frontmatter with `name` and `description` (the description is a trigger phrase, not a summary). Load a skill by reading its SKILL.md when its trigger matches your task.
 
-## Skill routing (33 skills, 10 tracks)
+## Skill routing (41 skills, 10 tracks)
 
 | Task shape | First skill |
 |---|---|
