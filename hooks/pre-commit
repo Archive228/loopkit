@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# loopkit pre-commit hook: validate every SKILL.md frontmatter before letting
+# a commit land. Enable per-repo with:
+#     git config core.hooksPath hooks
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if [ -x scripts/validate-skills ]; then
+  scripts/validate-skills
+fi

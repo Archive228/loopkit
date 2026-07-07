@@ -1,0 +1,20 @@
+{
+  "name": "loopkit-marketplace",
+  "description": "Standalone marketplace for loopkit — 33 skills + minimal harness.",
+  "owner": {
+    "name": "Archive228",
+    "url": "https://github.com/Archive228"
+  },
+  "plugins": [
+    {
+      "name": "loopkit",
+      "description": "33 battle-tested skills + a minimal harness for Claude Code, Cursor, Codex, Gemini CLI.",
+      "version": "0.2.0",
+      "source": "./",
+      "author": {
+        "name": "Archive228",
+        "url": "https://github.com/Archive228"
+      }
+    }
+  ]
+}

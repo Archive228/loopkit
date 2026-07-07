@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# loopkit committer: stage exactly the listed files, enforce a non-empty
+# commit message, refuse "." (safer than `git add -A`). Pairs with
+# hooks/pre-commit → scripts/validate-skills. Zero-dep bash. Pattern
+# adapted from steipete/agent-scripts.
+set -euo pipefail
+set -f  # disable glob expansion in case a path has brackets
+
+usage() {
+  printf 'Usage: %s "commit message" <file> [<file>...]\n' "$(basename "$0")" >&2
+  exit 2
+}
+
+[ "$#" -ge 2 ] || usage
+
+msg="$1"; shift
+[[ "$msg" == *[![:space:]]* ]] || { echo "committer: empty commit message" >&2; exit 1; }
+if [ -e "$msg" ]; then
+  echo "committer: first arg '$msg' looks like a file — commit message must come first" >&2
+  exit 1
+fi
+
+for f in "$@"; do
+  if [ "$f" = "." ]; then
+    echo "committer: '.' is not allowed — list specific paths so guardrails still apply" >&2
+    exit 1
+  fi
+done
+
+# Verify each path either exists on disk or is tracked (allows staging deletions).
+for f in "$@"; do
+  if [ ! -e "$f" ]; then
+    if ! git ls-files --error-unmatch -- "$f" >/dev/null 2>&1; then
+      if ! git cat-file -e "HEAD:$f" >/dev/null 2>&1; then
+        echo "committer: file not found: $f" >&2
+        exit 1
+      fi
+    fi
+  fi
+done
+
+git restore --staged :/ >/dev/null 2>&1 || true
+git add -A -- "$@"
+
+if git diff --staged --quiet; then
+  echo "committer: no staged changes for: $*" >&2
+  exit 1
+fi
+
+git commit -m "$msg" -- "$@"
+printf 'committer: committed "%s" (%d file(s))\n' "$msg" "$#"

@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# validate-skills: check every skills/*/SKILL.md and .claude/skills/*/SKILL.md
+# for a well-formed YAML frontmatter with non-empty `name` and `description`,
+# and reject duplicate skill names. Zero-dep bash port of the pattern
+# steipete/agent-scripts ships in Ruby.
+#
+# Exit codes:
+#   0 - all skills valid
+#   1 - one or more skills invalid, or duplicate name
+#   2 - no SKILL.md files found
+set -eo pipefail
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$repo_root"
+
+# Collect SKILL.md files. Support both the repo layout (skills/*/SKILL.md)
+# and installed-into-a-project layout (.claude/skills/*/SKILL.md).
+files=()
+for root in skills .claude/skills; do
+  [ -d "$root" ] || continue
+  while IFS= read -r -d '' f; do
+    files+=("$f")
+  done < <(find "$root" -mindepth 2 -maxdepth 2 -type f -name SKILL.md -print0)
+done
+
+if [ "${#files[@]}" -eq 0 ]; then
+  echo "validate-skills: no SKILL.md files found" >&2
+  exit 2
+fi
+
+errors=0
+# Parallel arrays instead of `declare -A` — bash 3.2 (macOS default) has no
+# associative arrays.
+seen_names=()
+seen_paths=()
+
+for f in "${files[@]}"; do
+  # Frontmatter must open on line 1.
+  first_line="$(head -n1 "$f")"
+  if [ "$first_line" != "---" ]; then
+    echo "FAIL $f: frontmatter must start with '---' on line 1" >&2
+    errors=$((errors + 1))
+    continue
+  fi
+
+  # Extract frontmatter block (lines between the first two '---' markers).
+  fm="$(awk 'NR==1 && /^---$/ {inblock=1; next} inblock && /^---$/ {exit} inblock {print}' "$f")"
+  if [ -z "$fm" ]; then
+    echo "FAIL $f: empty or unterminated frontmatter block" >&2
+    errors=$((errors + 1))
+    continue
+  fi
+
+  # Pull `name:` and `description:` values. Tolerate quoted or unquoted,
+  # single-line values (we do not follow YAML folding here — same limit
+  # steipete's validator has in practice).
+  name="$(printf '%s\n' "$fm" | awk -F': *' '/^name: */ {sub(/^name: */,""); print; exit}')"
+  desc="$(printf '%s\n' "$fm" | awk '/^description:/,/^[a-zA-Z_-]+:/ {print}' | awk 'NR==1 {sub(/^description: */,""); print; next} /^[a-zA-Z_-]+:/ {exit} {print}')"
+  # Strip surrounding quotes and trailing whitespace.
+  name="${name%\"}"; name="${name#\"}"
+  name="${name%\'}"; name="${name#\'}"
+  name="$(printf '%s' "$name" | sed -e 's/[[:space:]]*$//')"
+  desc="$(printf '%s' "$desc" | sed -e 's/[[:space:]]*$//')"
+
+  if [ -z "$name" ]; then
+    echo "FAIL $f: missing non-empty 'name' in frontmatter" >&2
+    errors=$((errors + 1))
+    continue
+  fi
+  if [ -z "$desc" ]; then
+    echo "FAIL $f: missing non-empty 'description' in frontmatter" >&2
+    errors=$((errors + 1))
+    continue
+  fi
+
+  dup_idx=-1
+  for i in "${!seen_names[@]}"; do
+    if [ "${seen_names[$i]}" = "$name" ]; then dup_idx=$i; break; fi
+  done
+  if [ "$dup_idx" -ge 0 ]; then
+    echo "FAIL $f: duplicate skill name '$name' also used by ${seen_paths[$dup_idx]}" >&2
+    errors=$((errors + 1))
+    continue
+  fi
+  seen_names+=("$name")
+  seen_paths+=("$f")
+done
+
+if [ "$errors" -gt 0 ]; then
+  echo "validate-skills: $errors error(s) across ${#files[@]} SKILL.md file(s)" >&2
+  exit 1
+fi
+
+echo "validate-skills: ${#files[@]} skill(s) OK"
+exit 0

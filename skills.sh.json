@@ -1,0 +1,101 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Agent / LLM",
+      "description": "Load only when relevant. Keep the loop honest.",
+      "skills": [
+        "context-budget",
+        "spec-first",
+        "tool-restraint",
+        "subagent-fanout",
+        "using-loopkit"
+      ]
+    },
+    {
+      "title": "Debug",
+      "description": "Reproduce, isolate, fix root cause — not symptom.",
+      "skills": [
+        "systematic-debugging",
+        "read-the-trace",
+        "bisect-regression"
+      ]
+    },
+    {
+      "title": "Security",
+      "description": "OWASP, authz, input validation, secrets, deps.",
+      "skills": [
+        "owasp-review",
+        "authz-check",
+        "input-validation",
+        "secret-scan",
+        "dependency-audit"
+      ]
+    },
+    {
+      "title": "Frontend",
+      "description": "Design system, a11y, loading/empty/error states.",
+      "skills": [
+        "design-system",
+        "a11y-pass",
+        "loading-empty-error-states"
+      ]
+    },
+    {
+      "title": "Testing",
+      "description": "Failing test first, flakes, coverage gaps, contracts.",
+      "skills": [
+        "write-failing-test-first",
+        "flaky-hunter",
+        "coverage-gaps",
+        "contract-test"
+      ]
+    },
+    {
+      "title": "Refactor",
+      "description": "Kill dead code. Simplify. Flatten nesting.",
+      "skills": [
+        "kill-dead-code",
+        "simplify",
+        "reduce-nesting"
+      ]
+    },
+    {
+      "title": "Docs",
+      "description": "Changelog, decision records, README audit.",
+      "skills": [
+        "changelog-from-diff",
+        "decision-record",
+        "readme-audit"
+      ]
+    },
+    {
+      "title": "Data",
+      "description": "SQL review, migration writer, schema diffs.",
+      "skills": [
+        "sql-review",
+        "migration-writer",
+        "schema-diff"
+      ]
+    },
+    {
+      "title": "Git / Ops",
+      "description": "Clean commits, PR from diff, safe rebase, surgical revert.",
+      "skills": [
+        "clean-commits",
+        "pr-from-diff",
+        "rebase-safely",
+        "revert-surgical"
+      ]
+    },
+    {
+      "title": "Review",
+      "description": "The 11 shortcuts agents take to fake 'done', and the gate before you claim.",
+      "skills": [
+        "adversarial-verify",
+        "verification-before-completion"
+      ]
+    }
+  ]
+}
