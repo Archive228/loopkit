@@ -11,12 +11,12 @@
   █████▄▄██  ▀██████▀   ▀██████▀   ▄████▀       ███   ▀█▀ █▀     ▄████▀
 ```
 
-**A drop-in `.claude/` harness + 33 battle-tested skills for coding agents.**
+**A drop-in `.claude/` harness + 41 battle-tested skills for coding agents.**
 
 Plan → Act → Verify, enforced by files on disk. Ships the floor, keeps out of your way.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-33-black.svg)](#the-library)
+[![Skills](https://img.shields.io/badge/skills-41-black.svg)](#the-library)
 [![Tracks](https://img.shields.io/badge/tracks-9-black.svg)](#the-library)
 [![Compatible](https://img.shields.io/badge/agents-Claude%20Code%20%C2%B7%20Cursor%20%C2%B7%20Codex%20%C2%B7%20Gemini-black.svg)](#compatibility)
 [![skills.sh](https://img.shields.io/badge/skills.sh-Archive228%2Floopkit-green.svg)](https://www.skills.sh/)
@@ -51,7 +51,7 @@ Straight from my own `.claude/` directory. This is the loadout I actually reach 
 
 **loopkit is:**
 - A working harness: settings, hooks, verifier subagent, loop runner. Files on disk, no runtime.
-- 33 small skills that load only when relevant, so the agent specializes instead of guessing.
+- 41 small skills that load only when relevant, so the agent specializes instead of guessing.
 - Cross-agent. Every skill is a plain markdown doc with a YAML header — nothing Claude-specific inside the skill body.
 
 **loopkit isn't:**
@@ -89,7 +89,7 @@ your-project/
 │   ├── agents/
 │   │   └── verifier.md    # adversarial verifier subagent (Haiku, JSON-out)
 │   ├── hooks/             # session-start bootstrap
-│   └── skills/            # 33 skills, symlinked or copied
+│   └── skills/            # 41 skills, symlinked or copied
 ├── .mcp.json              # MCP server wiring (github, context7)
 ├── MEMORY.md              # cross-session memory index (keep terse)
 └── run.sh                 # Plan → Act → Verify loop runner
@@ -109,7 +109,7 @@ Runs on Haiku. Reads the diff assuming it's broken. Checks the 11 "fake done" sh
 ### `.claude/hooks/` — session-start bootstrap
 Fires when the agent opens the project. Reminds it of the loop shape and points at `CLAUDE.md`. Zero runtime cost.
 
-### `.claude/skills/` — the 33-skill library
+### `.claude/skills/` — the 41-skill library
 Each skill: YAML frontmatter with `name` + `description`, a short body, no runtime dependencies. Loads only when its trigger fires. See the full list below.
 
 ### `.mcp.json` — MCP wiring
@@ -125,7 +125,7 @@ Preferences, decisions, feedback you keep re-applying. Prune every session or it
 
 ## The library
 
-**33 skills across 9 tracks.** Each one: name → what it does → when it fires.
+**41 skills across 9 tracks.** Each one: name → what it does → when it fires.
 
 ### agent/llm — how the agent behaves
 - **context-budget** — trim the working set → *before large reads or long sessions*
@@ -240,7 +240,7 @@ The bundled harness (`settings.json`, hooks, verifier subagent) is Claude-Code-s
 | Ships a harness (settings, verifier, loop runner) | **yes** | no | no | no |
 | Skills load only on trigger (YAML frontmatter) | yes | yes | yes | yes |
 | Methodology commitment required | **none** | Prime Radiant | GSD-adjacent | 6-phase lifecycle |
-| Skill count | 33 | ~40 | ~19 | ~24 |
+| Skill count | 41 | ~40 | ~19 | ~24 |
 | Compatible with non-Claude agents | yes | Claude-first | multi | multi |
 | Install size | tiny | medium | medium | medium |
 
