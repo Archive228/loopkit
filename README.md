@@ -11,13 +11,13 @@
   █████▄▄██  ▀██████▀   ▀██████▀   ▄████▀       ███   ▀█▀ █▀     ▄████▀
 ```
 
-**A drop-in `.claude/` harness + 41 battle-tested skills for coding agents.**
+**A drop-in `.claude/` harness + 49 battle-tested skills for coding agents.**
 
 Plan → Act → Verify, enforced by files on disk. Ships the floor, keeps out of your way.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-41-black.svg)](#the-library)
-[![Tracks](https://img.shields.io/badge/tracks-9-black.svg)](#the-library)
+[![Skills](https://img.shields.io/badge/skills-49-black.svg)](#the-library)
+[![Tracks](https://img.shields.io/badge/tracks-10-black.svg)](#the-library)
 [![Compatible](https://img.shields.io/badge/agents-Claude%20Code%20%C2%B7%20Cursor%20%C2%B7%20Codex%20%C2%B7%20Gemini-black.svg)](#compatibility)
 [![skills.sh](https://img.shields.io/badge/skills.sh-Archive228%2Floopkit-green.svg)](https://www.skills.sh/)
 
@@ -51,7 +51,7 @@ Straight from my own `.claude/` directory. This is the loadout I actually reach 
 
 **loopkit is:**
 - A working harness: settings, hooks, verifier subagent, loop runner. Files on disk, no runtime.
-- 41 small skills that load only when relevant, so the agent specializes instead of guessing.
+- 49 small skills that load only when relevant, so the agent specializes instead of guessing.
 - Cross-agent. Every skill is a plain markdown doc with a YAML header — nothing Claude-specific inside the skill body.
 
 **loopkit isn't:**
@@ -71,9 +71,9 @@ Every skill fires inside this shape. The harness enforces it.
     └────── revise ──────┘
 ```
 
-- **PLAN** — `spec-first`, `context-budget`, `tool-restraint` load here.
+- **PLAN** — `spec-first`, `context-budget`, `tool-restraint`, `planner-spec-expand`, `sprint-contract` load here.
 - **ACT** — domain skills load here (debug, security, testing, refactor, docs, data, git-ops).
-- **VERIFY** — `adversarial-verify` + the verifier subagent close the loop before anything ships.
+- **VERIFY** — `adversarial-verify` + `evaluator-calibration` + the verifier subagent close the loop before anything ships.
 
 Full theory: **[Loop and Harness engineering: 7 files, 5 steps](./docs/effective-harnesses-v03.md)**.
 
@@ -89,7 +89,7 @@ your-project/
 │   ├── agents/
 │   │   └── verifier.md    # adversarial verifier subagent (Haiku, JSON-out)
 │   ├── hooks/             # session-start bootstrap
-│   └── skills/            # 41 skills, symlinked or copied
+│   └── skills/            # 49 skills, symlinked or copied
 ├── .mcp.json              # MCP server wiring (github, context7)
 ├── MEMORY.md              # cross-session memory index (keep terse)
 └── run.sh                 # Plan → Act → Verify loop runner
@@ -109,7 +109,7 @@ Runs on Haiku. Reads the diff assuming it's broken. Checks the 11 "fake done" sh
 ### `.claude/hooks/` — session-start bootstrap
 Fires when the agent opens the project. Reminds it of the loop shape and points at `CLAUDE.md`. Zero runtime cost.
 
-### `.claude/skills/` — the 41-skill library
+### `.claude/skills/` — the 49-skill library
 Each skill: YAML frontmatter with `name` + `description`, a short body, no runtime dependencies. Loads only when its trigger fires. See the full list below.
 
 ### `.mcp.json` — MCP wiring
@@ -125,13 +125,23 @@ Preferences, decisions, feedback you keep re-applying. Prune every session or it
 
 ## The library
 
-**41 skills across 9 tracks.** Each one: name → what it does → when it fires.
+**49 skills across 10 tracks.** Each one: name → what it does → when it fires.
 
 ### agent/llm — how the agent behaves
 - **context-budget** — trim the working set → *before large reads or long sessions*
 - **spec-first** — write the contract before code → *any new feature or endpoint*
 - **tool-restraint** — pick the smallest tool that fits → *avoids Bash-for-everything drift*
 - **subagent-fanout** — parallelize independent probes → *research/audit tasks*
+
+### loop & harness — long-running, multi-session, multi-agent discipline
+- **planner-spec-expand** — 1–4 sentence brief → full ambitious spec with design language and ordered feature list → *starting a fresh project or major feature*
+- **sprint-contract** — negotiate "done" as script-decidable predicates before code → *entering an implementation sprint with an evaluator in the loop*
+- **feature-list-json** — enumerate every feature as strict JSON, `passes:false`, editable-passes-only → *multi-session builds*
+- **init-script-contract** — idempotent `init.sh` + `test.sh`/`stop.sh`/`reset.sh` siblings, under 120s → *setting up a repo for multi-session agent work*
+- **progress-reading-protocol** — fixed 6-step session-open ritual (pwd → progress → git log → feature-count → init → smoke-test) → *any session bootstrapping into an existing project*
+- **self-eval-bias** — interrupt confidently-praise-my-own-work drift → *when an agent is about to declare success on its own output*
+- **evaluator-calibration** — few-shot the reviewer persona with rubric anchors to keep skepticism from drifting lenient → *before a long autonomous run with a reviewer agent*
+- **harness-stripping** — remove one harness component at a time and measure impact, on every model release → *when a new model lands, before piling on more scaffolding*
 
 ### debug
 - **systematic-debugging** — hypothesis → test → narrow → *any bug you can't one-shot*
@@ -179,6 +189,7 @@ Preferences, decisions, feedback you keep re-applying. Prune every session or it
 
 ### review
 - **adversarial-verify** — the 11 shortcuts agents take to fake "done" → *before flipping any task to complete*
+- **verification-before-completion** — run the exact command, read the output, then claim → *before any "done" claim*
 
 ---
 
@@ -240,7 +251,7 @@ The bundled harness (`settings.json`, hooks, verifier subagent) is Claude-Code-s
 | Ships a harness (settings, verifier, loop runner) | **yes** | no | no | no |
 | Skills load only on trigger (YAML frontmatter) | yes | yes | yes | yes |
 | Methodology commitment required | **none** | Prime Radiant | GSD-adjacent | 6-phase lifecycle |
-| Skill count | 41 | ~40 | ~19 | ~24 |
+| Skill count | 49 | ~40 | ~19 | ~24 |
 | Compatible with non-Claude agents | yes | Claude-first | multi | multi |
 | Install size | tiny | medium | medium | medium |
 
@@ -252,7 +263,7 @@ Full breakdown: [docs/vs-others.md](./docs/vs-others.md).
 
 loopkit is deliberately not a methodology. Approaches like BMAD, Spec-Kit, and full lifecycle skill packs try to help by owning the process — but they take away the control that makes agents useful in your codebase. loopkit gives you the mini-skills and a floor to stand on. Everything else is yours to shape.
 
-The two failure modes long-running agents actually hit (doing too much at once; premature victory) are structural, not skill-shaped. `run.sh` + the verifier subagent are the structural answer. The skills just make each turn cheaper.
+The two failure modes long-running agents actually hit (doing too much at once; premature victory) are structural, not skill-shaped. `run.sh` + the verifier subagent are the structural answer. The skills just make each turn cheaper. The new **loop & harness** track (planner-spec-expand, sprint-contract, evaluator-calibration, harness-stripping, and friends) operationalizes the multi-session discipline described in the companion article.
 
 ---
 
