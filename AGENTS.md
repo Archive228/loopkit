@@ -57,3 +57,7 @@ The maker's-head reviewer always agrees with itself. `/verify` is a separate, ho
 ## When user instructions and this file disagree
 
 User instructions win. This file is the default when the user has not said otherwise.
+
+## Escalation
+
+When stuck, the agent runs `hitl-escalate`. If no channel is configured, it writes `BLOCKED.md` and the loop exits with code 2. Human unblocks, deletes `BLOCKED.md`, restarts `run.sh`.
