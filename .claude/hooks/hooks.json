@@ -11,6 +11,18 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT:-.}/.claude/hooks/pre-compact\"",
+            "async": false
+          }
+        ]
+      }
     ]
   }
 }

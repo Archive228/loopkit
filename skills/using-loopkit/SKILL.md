@@ -71,6 +71,31 @@ Process skills first (spec-first, systematic-debugging, planner-spec-expand, spr
 - "Fix bug Y" → `systematic-debugging` → `read-the-trace` → fix → `verification-before-completion`.
 - "Session open in existing project" → `progress-reading-protocol` → `sprint-contract` → work.
 
+## Skill release convention
+
+Every new skill in loopkit ships as a folder with four required files. No exceptions — a skill without these is a draft, not a release.
+
+```
+skills/<skill-name>/
+  SKILL.md            # the skill itself (frontmatter + procedure)
+  POST.md             # ~200-word X-thread-shaped explainer
+  evidence/
+    before.md         # verbatim transcript WITHOUT the skill loaded
+    after.md          # same prompt WITH the skill loaded
+```
+
+- `SKILL.md` — routed on its frontmatter `description`. Body under ~150 lines.
+- `POST.md` — the announcement thread. Copy from `template/POST.md`, fill in every placeholder before publishing.
+- `evidence/before.md` + `evidence/after.md` — one real task, both transcripts. The before/after pair is the receipt that the skill actually changes behaviour. If you cannot produce it, the skill is not ready; land it as a draft and merge once the evidence is real.
+
+Bootstrap a new skill by copying `template/` verbatim:
+
+```
+cp -r template skills/<skill-name>
+```
+
+Then edit SKILL.md, write POST.md, and capture the before/after pair.
+
 ## User instructions win
 
 CLAUDE.md, AGENTS.md, and direct user requests override loopkit skills. Only skip a skill workflow when the user has explicitly said to.

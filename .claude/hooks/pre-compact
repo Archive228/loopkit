@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# PreCompact hook for loopkit: skim the transcript before it is
+# compacted, extract high-signal decisions (chose X, rejected Y, tried
+# and failed, switched from A to B), and append them to a
+# machine-readable ./claude-decisions.json in the project root.
+#
+# Compaction destroys prose reasoning. Decisions are the part worth
+# keeping in structured form so the next fresh-context session can
+# rehydrate the "why" without re-deriving it. See the active-memory-reminder
+# skill and Meta's NapMem work on behavioral-state-decay.
+#
+# Silent-safe: this hook MUST NOT block compaction. Any error goes to
+# stderr and we exit 0.
+set -u
+
+log() { printf 'loopkit/pre-compact: %s\n' "$*" >&2; }
+
+# Claude Code sends a JSON blob on stdin with transcript_path + cwd.
+payload="$(cat 2>/dev/null || true)"
+
+transcript=""
+cwd=""
+if [ -n "$payload" ] && command -v jq >/dev/null 2>&1; then
+  transcript="$(printf '%s' "$payload" | jq -r '.transcript_path // empty' 2>/dev/null || true)"
+  cwd="$(printf '%s' "$payload" | jq -r '.cwd // empty' 2>/dev/null || true)"
+fi
+
+# Fallbacks: some clients pass transcript as $1; cwd defaults to PWD.
+[ -z "$transcript" ] && [ $# -ge 1 ] && transcript="$1"
+[ -z "$cwd" ] && cwd="$PWD"
+[ -n "$transcript" ] && [ -f "$transcript" ] || { log "no transcript, skipping"; exit 0; }
+
+out="${cwd}/claude-decisions.json"
+[ -f "$out" ] || printf '[]\n' > "$out"
+
+# Extract assistant text lines matching the decision patterns. Cap the
+# number of hits so a pathological transcript can't balloon the file.
+pattern='(decided|chose|rejected|tried and failed|switched from .* to|going with|not going to)'
+hits="$(jq -r 'select(.type=="assistant") | .message.content[]? | select(.type=="text") | .text' \
+        "$transcript" 2>/dev/null \
+      | grep -Eio "[^.!?]{0,200}${pattern}[^.!?]{0,200}[.!?]" \
+      | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
+      | awk 'length > 20 && length < 400' \
+      | awk '!seen[$0]++' \
+      | head -20 || true)"
+
+[ -n "$hits" ] || { log "no new decisions extracted"; exit 0; }
+
+ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+tmp="$(mktemp "${TMPDIR:-/tmp}/loopkit-decisions.XXXXXX")" || { log "mktemp failed"; exit 0; }
+
+# Append each hit as {ts, decision} into the JSON array.
+if printf '%s\n' "$hits" \
+  | jq -Rn --arg ts "$ts" \
+      '[inputs | select(length>0) | {ts:$ts, decision:.}]' \
+  | jq --slurpfile old "$out" '$old[0] + .' > "$tmp" 2>/dev/null; then
+  mv "$tmp" "$out"
+  log "appended $(printf '%s\n' "$hits" | wc -l | tr -d ' ') decision(s) to $out"
+else
+  rm -f "$tmp"
+  log "jq merge failed"
+fi
+
+exit 0

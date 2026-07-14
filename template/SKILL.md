@@ -14,7 +14,9 @@ Recommended structure:
   1. One-paragraph statement of the failure mode this skill exists to prevent.
   2. A short checklist or numbered procedure the agent should follow.
   3. Red flags — the shortcuts an agent takes when it wants to skip this.
-  4. (optional) `references/` sibling files with deeper material the skill
+  4. Evidence — a required before/after pair proving the skill actually
+     changes behaviour. Ships in the sibling evidence/ folder.
+  5. (optional) `references/` sibling files with deeper material the skill
      lazy-loads only when needed.
 
 Do not include:
@@ -43,6 +45,21 @@ Without this skill, the agent tends to <failure mode>. This skill enforces <the 
 | "I've done this before, I don't need the checklist" | Skills evolve; re-read the current SKILL.md. |
 | "This case is simple" | Simple cases become complex mid-task. |
 | "The user didn't ask for this rigor" | The user asked for a working result. Rigor is how you get one. |
+
+## Evidence
+
+Every skill ships with a real before/after pair proving it changes agent
+behaviour on a concrete task. Without this, the skill is a claim, not a
+tool.
+
+- `evidence/before.md` — a verbatim snippet of what the agent does on a
+  representative task WITHOUT this skill loaded. Include the prompt, the
+  agent's response, and what went wrong (or what got skipped).
+- `evidence/after.md` — the same prompt with this skill loaded. Show the
+  changed behaviour and why it is better.
+
+If you cannot produce a before/after pair, the skill is not ready to ship.
+Land it as a draft in a branch, gather the evidence, then merge.
 
 ## References
 

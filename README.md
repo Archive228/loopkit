@@ -43,6 +43,16 @@ That's it. Skills load only when a task triggers them. The verifier subagent clo
 
 > Existing files are kept by default. Pass `FORCE=1` to overwrite, or `BACKUP=1` to snapshot your current `.claude/` to `.claude.bak-<timestamp>/` before writing.
 
+## Cherry-pick a single skill
+
+Prefer one skill over the whole floor?
+
+```bash
+npx -p claude-loopkit loopkit-add adversarial-verify
+```
+
+Installs only that skill into `./.claude/skills/`. Pass `--force` to overwrite an existing copy. Browse the catalog at [skills/](./skills).
+
 ---
 
 ## What loopkit is (and isn't)
@@ -201,6 +211,14 @@ Skills stay short. When one needs a longer reference, it points here:
 - [Red Flags](./docs/checklists/red-flags.md) — 15 patterns the verifier looks for
 - [Rationalizations](./docs/checklists/rationalizations.md) — excuses agents give and their rebuttals
 
+## Slash commands
+
+Three commands ship in `.claude/commands/`. Each loads a small set of skills and drives a fixed protocol — no hidden state.
+
+- **Spec first: `/spec`** — write `PROMPT.md` and `IMPLEMENTATION_PLAN.md` before the agent touches code.
+- **Adversarial verify: `/verify`** — assume the diff is broken; run the 11-shortcut checklist and dispatch the verifier subagent.
+- **One-shot polish pass: `/polish`** — batch quality pass over the current diff (simplify → reduce-nesting → kill-dead-code → a11y-pass → loading-empty-error-states → readme-audit).
+
 ---
 
 ## Install
@@ -229,6 +247,12 @@ cp -r loopkit/.claude your-project/
 | `LOOPKIT_REF=<branch>` | Install from a specific branch/tag (default `main`) |
 
 The installer prints every write, verifies the `claude` CLI is on your PATH afterward, and exits non-zero if anything critical failed.
+
+---
+
+## Portability
+
+Not tied to Claude. See [docs/portability.md](docs/portability.md).
 
 ---
 

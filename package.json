@@ -1,6 +1,6 @@
 {
   "name": "claude-loopkit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Drop-in .claude/ harness + 41 battle-tested skills for any coding agent (Claude Code, Cursor, Codex, Gemini CLI).",
   "keywords": [
     "claude",
@@ -26,7 +26,8 @@
   "license": "MIT",
   "author": "Archive228",
   "bin": {
-    "claude-loopkit": "bin/loopkit.js"
+    "claude-loopkit": "bin/loopkit.js",
+    "loopkit-add": "./bin/loopkit-add"
   },
   "engines": {
     "node": ">=18"

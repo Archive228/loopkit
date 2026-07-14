@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# loopkit-add — cherry-pick one skill from Archive228/loopkit into ./.claude/skills/
+# Usage: loopkit-add <skill-name> [--force] [-h|--help]
+set -euo pipefail
+
+REPO="Archive228/loopkit"
+REF="main"
+API="https://api.github.com/repos/${REPO}/contents/skills"
+RAW="https://raw.githubusercontent.com/${REPO}/${REF}/skills"
+
+usage() {
+  cat <<EOF
+loopkit-add — install one loopkit skill into ./.claude/skills/
+
+Usage:
+  loopkit-add <skill-name>        install a skill (skip if dir exists)
+  loopkit-add <skill-name> --force overwrite existing files
+  loopkit-add -h | --help         show this help
+
+Example:
+  loopkit-add adversarial-verify
+
+Browse skills: https://github.com/${REPO}/tree/${REF}/skills
+EOF
+}
+
+FORCE=0
+SKILL=""
+for arg in "$@"; do
+  case "$arg" in
+    -h|--help) usage; exit 0 ;;
+    --force)   FORCE=1 ;;
+    -*)        echo "unknown flag: $arg" >&2; usage; exit 2 ;;
+    *)         SKILL="$arg" ;;
+  esac
+done
+
+[ -n "$SKILL" ] || { usage; exit 2; }
+command -v curl >/dev/null || { echo "curl required" >&2; exit 1; }
+
+DEST=".claude/skills/${SKILL}"
+if [ -d "$DEST" ] && [ "$FORCE" -ne 1 ]; then
+  echo "$DEST already exists — pass --force to overwrite" >&2
+  exit 1
+fi
+
+listing="$(curl -fsSL -H 'Accept: application/vnd.github+json' "${API}/${SKILL}?ref=${REF}" 2>/dev/null || true)"
+if [ -z "$listing" ] || echo "$listing" | grep -q '"message": *"Not Found"'; then
+  echo "skill '${SKILL}' not found upstream at ${REPO}/skills/${SKILL}" >&2
+  exit 1
+fi
+
+paths="$(printf '%s\n' "$listing" | grep -oE '"path": *"[^"]+"' | sed 's/.*"path": *"//; s/"$//')"
+[ -n "$paths" ] || { echo "no files listed for ${SKILL}" >&2; exit 1; }
+
+mkdir -p "$DEST"
+n=0
+while IFS= read -r p; do
+  rel="${p#skills/${SKILL}/}"
+  out="${DEST}/${rel}"
+  mkdir -p "$(dirname "$out")"
+  curl -fsSL "${RAW}/${SKILL}/${rel}" -o "$out"
+  n=$((n+1))
+done <<< "$paths"
+
+echo "installed ${n} files into ${DEST}/"

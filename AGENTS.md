@@ -61,3 +61,11 @@ User instructions win. This file is the default when the user has not said other
 ## Escalation
 
 When stuck, the agent runs `hitl-escalate`. If no channel is configured, it writes `BLOCKED.md` and the loop exits with code 2. Human unblocks, deletes `BLOCKED.md`, restarts `run.sh`.
+
+## Model routing
+
+`run.sh` reads `CLAUDE_EXECUTOR_MODEL` (per-turn workhorse call) and `CLAUDE_JUDGE_MODEL` (per-turn `/verify` call) as first-class knobs, plus `CLAUDE_PLANNER_MODEL` reserved for `/spec`. Unset = CLI default. See `skills/model-routing/SKILL.md` for the cheap-executor + frontier-judge shape.
+
+## Presets
+
+The `presets/` directory holds opinionated stacks — arrangements of the base skills for specific shipping cadences. Base loopkit stays a 49-skill floor that any preset can build on; the presets themselves are one arrangement of that floor, not replacements for it. `presets/finn-loop/` is the first one to ship: async, human-gated (`/spec` → ACK → `/build` → `/review` → rocket-emoji merge signal), with Linear-MCP and Slack-webhook hooks that are OFF by default. Future presets on the roadmap: `three-agent` (planner + generator + evaluator, per Prithvi's harness-design work) and `executor-judge` (do → judge → do → judge).

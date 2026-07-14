@@ -1,0 +1,20 @@
+{
+  "_comment": "PLACEHOLDER — Linear MCP integration for Finn Loop. OFF by default. To enable: (1) remove the leading underscores from the keys below, (2) fill in your workspace + API key, (3) run `claude mcp add-json linear \"$(cat .claude/integrations/linear-mcp.json)\"`. Nothing in loopkit reads this file until you wire it up manually — this is on purpose. Finn Loop's contract is 'human-gated'; auto-provisioning an issue-tracker MCP behind the human's back would violate it.",
+
+  "_mcpServers": {
+    "_linear": {
+      "_command": "npx",
+      "_args": ["-y", "@modelcontextprotocol/server-linear"],
+      "_env": {
+        "_LINEAR_API_KEY": "lin_api_REPLACE_ME",
+        "_LINEAR_WORKSPACE_ID": "REPLACE_ME"
+      }
+    }
+  },
+
+  "_finn_loop_hooks": {
+    "_on_spec_pending": "create Linear issue with SPEC-PENDING.md body, label 'finn-loop:pending'",
+    "_on_spec_approved": "move Linear issue to 'In Progress'",
+    "_on_review_rocket": "move Linear issue to 'Ready for Merge', add rocket emoji reaction"
+  }
+}
